@@ -108,4 +108,43 @@ describe('AccountSettingsPage', () => {
 
     fireEvent.click(submitButton);
   });
+
+  it('renders the social media links section with the OST2 platform set', () => {
+    // Must stay in lock-step with the profile MFE's platform set/order.
+    const expectedPlatformLabels = [
+      'Blog',
+      'LinkedIn',
+      'GitHub',
+      'GitLab',
+      'Mastodon',
+      'Bluesky',
+      'X',
+      'Discord',
+    ];
+
+    const {
+      getByText, queryByText, getByRole,
+    } = render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+
+    expect(getByRole('heading', { name: 'Social Media Links' })).toBeInTheDocument();
+
+    // Every platform the profile shows must be editable here.
+    expectedPlatformLabels.forEach((label) => {
+      expect(getByText(label)).toBeInTheDocument();
+    });
+
+    // ...and in the same order as the profile MFE. Reading the section's text
+    // content gives us the labels in DOM order, so their indices must be
+    // strictly increasing.
+    const sectionText = document.getElementById('social-media').textContent;
+    const positions = expectedPlatformLabels.map(label => sectionText.indexOf(label));
+    positions.forEach((pos) => {
+      expect(pos).toBeGreaterThanOrEqual(0);
+    });
+    const sortedPositions = [...positions].sort((a, b) => a - b);
+    expect(positions).toEqual(sortedPositions);
+
+    // Facebook was intentionally removed and must not appear.
+    expect(queryByText('Facebook')).not.toBeInTheDocument();
+  });
 });

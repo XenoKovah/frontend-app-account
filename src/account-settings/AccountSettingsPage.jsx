@@ -745,6 +745,20 @@ class AccountSettingsPage extends React.Component {
             )}
           </p>
 
+          {/*
+            Platform set and ordering must match the OST2 profile MFE
+            (frontend-app-profile src/profile/data/selectors.js and
+            src/profile/forms/SocialLinks.jsx) so the account editor lets a
+            learner edit every link shown on their profile.
+          */}
+          <EditableField
+            name="social_link_blog"
+            type="text"
+            value={this.props.formValues.social_link_blog}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.blog'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.blog.empty'])}
+            {...editableFieldProps}
+          />
           <EditableField
             name="social_link_linkedin"
             type="text"
@@ -754,11 +768,35 @@ class AccountSettingsPage extends React.Component {
             {...editableFieldProps}
           />
           <EditableField
-            name="social_link_facebook"
+            name="social_link_github"
             type="text"
-            value={this.props.formValues.social_link_facebook}
-            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.facebook'])}
-            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.facebook.empty'])}
+            value={this.props.formValues.social_link_github}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.github'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.github.empty'])}
+            {...editableFieldProps}
+          />
+          <EditableField
+            name="social_link_gitlab"
+            type="text"
+            value={this.props.formValues.social_link_gitlab}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.gitlab'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.gitlab.empty'])}
+            {...editableFieldProps}
+          />
+          <EditableField
+            name="social_link_mastodon"
+            type="text"
+            value={this.props.formValues.social_link_mastodon}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.mastodon'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.mastodon.empty'])}
+            {...editableFieldProps}
+          />
+          <EditableField
+            name="social_link_bluesky"
+            type="text"
+            value={this.props.formValues.social_link_bluesky}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.bluesky'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.bluesky.empty'])}
             {...editableFieldProps}
           />
           <EditableField
@@ -767,6 +805,14 @@ class AccountSettingsPage extends React.Component {
             value={this.props.formValues.social_link_twitter}
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter.empty'])}
+            {...editableFieldProps}
+          />
+          <EditableField
+            name="social_link_discord"
+            type="text"
+            value={this.props.formValues.social_link_discord}
+            label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.discord'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.discord.empty'])}
             {...editableFieldProps}
           />
         </div>
@@ -902,9 +948,14 @@ AccountSettingsPage.propTypes = {
     language_proficiencies: PropTypes.string,
     pending_name_change: PropTypes.string,
     phone_number: PropTypes.string,
+    social_link_blog: PropTypes.string,
     social_link_linkedin: PropTypes.string,
-    social_link_facebook: PropTypes.string,
+    social_link_github: PropTypes.string,
+    social_link_gitlab: PropTypes.string,
+    social_link_mastodon: PropTypes.string,
+    social_link_bluesky: PropTypes.string,
     social_link_twitter: PropTypes.string,
+    social_link_discord: PropTypes.string,
     time_zone: PropTypes.string,
     state: PropTypes.string,
     useVerifiedNameForCerts: PropTypes.bool.isRequired,

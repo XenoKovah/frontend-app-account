@@ -10,10 +10,22 @@ import { getThirdPartyAuthProviders } from '../third-party-auth';
 import { postVerifiedNameConfig } from '../certificate-preference/data/service';
 import { FIELD_LABELS } from './constants';
 
+// Keep this list in lock-step with the OST2 profile MFE
+// (frontend-app-profile src/profile/data/selectors.js knownPlatforms and
+// src/profile/forms/SocialLinks.jsx platformDisplayInfo). The profile editor
+// and this account editor must offer the exact same set of platforms so a
+// learner can edit every link they see on their profile. Facebook was
+// intentionally dropped; blog/github/gitlab/mastodon/bluesky/discord were
+// added; twitter is kept (the backend accepts both x.com and twitter.com URLs).
 const SOCIAL_PLATFORMS = [
-  { id: 'twitter', key: 'social_link_twitter' },
-  { id: 'facebook', key: 'social_link_facebook' },
+  { id: 'blog', key: 'social_link_blog' },
   { id: 'linkedin', key: 'social_link_linkedin' },
+  { id: 'github', key: 'social_link_github' },
+  { id: 'gitlab', key: 'social_link_gitlab' },
+  { id: 'mastodon', key: 'social_link_mastodon' },
+  { id: 'bluesky', key: 'social_link_bluesky' },
+  { id: 'twitter', key: 'social_link_twitter' },
+  { id: 'discord', key: 'social_link_discord' },
 ];
 
 function unpackAccountResponseData(data) {

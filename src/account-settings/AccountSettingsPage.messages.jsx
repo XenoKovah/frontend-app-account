@@ -511,24 +511,74 @@ const messages = defineMessages({
   },
   'account.settings.field.social.platform.name.twitter': {
     id: 'account.settings.field.social.platform.name.twitter',
-    defaultMessage: 'Twitter',
-    description: 'Label for Twitter',
+    defaultMessage: 'X',
+    description: 'Label for the X (formerly Twitter) social media link',
   },
   'account.settings.field.social.platform.name.twitter.empty': {
     id: 'account.settings.field.social.platform.name.twitter.empty',
-    defaultMessage: 'Add Twitter profile',
-    description: 'Placeholder for an empty Twitter field',
+    defaultMessage: 'Add X profile',
+    description: 'Placeholder for an empty X (formerly Twitter) field',
   },
 
-  'account.settings.field.social.platform.name.facebook': {
-    id: 'account.settings.field.social.platform.name.facebook',
-    defaultMessage: 'Facebook',
-    description: 'Label for Facebook',
+  'account.settings.field.social.platform.name.blog': {
+    id: 'account.settings.field.social.platform.name.blog',
+    defaultMessage: 'Blog',
+    description: 'Label for Blog',
   },
-  'account.settings.field.social.platform.name.facebook.empty': {
-    id: 'account.settings.field.social.platform.name.facebook.empty',
-    defaultMessage: 'Add Facebook profile',
-    description: 'Placeholder for an empty Facebook field',
+  'account.settings.field.social.platform.name.blog.empty': {
+    id: 'account.settings.field.social.platform.name.blog.empty',
+    defaultMessage: 'Add Blog',
+    description: 'Placeholder for an empty Blog field',
+  },
+  'account.settings.field.social.platform.name.github': {
+    id: 'account.settings.field.social.platform.name.github',
+    defaultMessage: 'GitHub',
+    description: 'Label for GitHub',
+  },
+  'account.settings.field.social.platform.name.github.empty': {
+    id: 'account.settings.field.social.platform.name.github.empty',
+    defaultMessage: 'Add GitHub profile',
+    description: 'Placeholder for an empty GitHub field',
+  },
+  'account.settings.field.social.platform.name.gitlab': {
+    id: 'account.settings.field.social.platform.name.gitlab',
+    defaultMessage: 'GitLab',
+    description: 'Label for GitLab',
+  },
+  'account.settings.field.social.platform.name.gitlab.empty': {
+    id: 'account.settings.field.social.platform.name.gitlab.empty',
+    defaultMessage: 'Add GitLab profile',
+    description: 'Placeholder for an empty GitLab field',
+  },
+  'account.settings.field.social.platform.name.mastodon': {
+    id: 'account.settings.field.social.platform.name.mastodon',
+    defaultMessage: 'Mastodon',
+    description: 'Label for Mastodon',
+  },
+  'account.settings.field.social.platform.name.mastodon.empty': {
+    id: 'account.settings.field.social.platform.name.mastodon.empty',
+    defaultMessage: 'Add Mastodon profile',
+    description: 'Placeholder for an empty Mastodon field',
+  },
+  'account.settings.field.social.platform.name.bluesky': {
+    id: 'account.settings.field.social.platform.name.bluesky',
+    defaultMessage: 'Bluesky',
+    description: 'Label for Bluesky',
+  },
+  'account.settings.field.social.platform.name.bluesky.empty': {
+    id: 'account.settings.field.social.platform.name.bluesky.empty',
+    defaultMessage: 'Add Bluesky profile',
+    description: 'Placeholder for an empty Bluesky field',
+  },
+  'account.settings.field.social.platform.name.discord': {
+    id: 'account.settings.field.social.platform.name.discord',
+    defaultMessage: 'Discord',
+    description: 'Label for Discord',
+  },
+  'account.settings.field.social.platform.name.discord.empty': {
+    id: 'account.settings.field.social.platform.name.discord.empty',
+    defaultMessage: 'Add Discord profile',
+    description: 'Placeholder for an empty Discord field',
   },
   'account.settings.editable.field.action.save': {
     id: 'account.settings.editable.field.action.save',
