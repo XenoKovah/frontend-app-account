@@ -39,6 +39,7 @@ import BetaLanguageBanner from './BetaLanguageBanner';
 import EmailField from './EmailField';
 import OneTimeDismissibleAlert from './OneTimeDismissibleAlert';
 import DOBModal from './DOBForm';
+import AdditionalSettingsSectionsSlot from '../plugin-slots/AdditionalSettingsSectionsSlot';
 import {
   YEAR_OF_BIRTH_OPTIONS,
   EDUCATION_LEVELS,
@@ -773,6 +774,7 @@ class AccountSettingsPage extends React.Component {
         <div className="mt-6" id="notifications" ref={this.navLinkRefs['#notifications']}>
           <NotificationSettings />
         </div>
+        <AdditionalSettingsSectionsSlot />
         <div className="account-section mb-5" id="site-preferences" ref={this.navLinkRefs['#site-preferences']}>
           <h2 className="section-heading h4 mb-3">
             {this.props.intl.formatMessage(messages['account.settings.section.site.preferences'])}
