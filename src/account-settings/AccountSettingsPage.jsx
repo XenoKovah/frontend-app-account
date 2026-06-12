@@ -23,15 +23,18 @@ import {
   fetchSettings,
   saveMultipleSettings,
   saveSettings,
+  saveSettingsFailure,
   updateDraft,
   beginNameChange,
 } from './data/actions';
 import { accountSettingsPageSelector } from './data/selectors';
+import { isSafeHttpUrl } from './data/service';
 import PageLoading from './PageLoading';
 import JumpNav from './JumpNav';
 import DeleteAccount from './delete-account';
 import EditableField from './EditableField';
 import EditableSelectField from './EditableSelectField';
+import ProfilePhotoField from './ProfilePhotoField';
 import ResetPassword from './reset-password';
 import NameChange from './name-change';
 import ThirdPartyAuth from './third-party-auth';
@@ -68,6 +71,7 @@ class AccountSettingsPage extends React.Component {
       '#basic-information': React.createRef(),
       '#profile-information': React.createRef(),
       '#social-media': React.createRef(),
+      '#profile-visibility': React.createRef(),
       '#notifications': React.createRef(),
       '#site-preferences': React.createRef(),
       '#linked-accounts': React.createRef(),
@@ -194,6 +198,55 @@ class AccountSettingsPage extends React.Component {
       };
     }
     this.props.saveSettings(formId, values, extendedProfileObject);
+  };
+
+  // Social links must be full http(s) URLs (the public profile only renders them
+  // as links when they pass isSafeHttpUrl). Validate before saving so the user
+  // gets immediate inline feedback instead of a round-trip backend error.
+  handleSubmitSocialLink = (formId, value) => {
+    if (value && !isSafeHttpUrl(value)) {
+      this.props.saveSettingsFailure({
+        fieldErrors: {
+          [formId]: this.props.intl.formatMessage(messages['account.settings.field.social.url.invalid']),
+        },
+      });
+      return;
+    }
+    this.props.saveSettings(formId, value);
+  };
+
+  // Per-field visibility. `name` is the dotted preference key (e.g. visibility.bio).
+  // Persist the WHOLE set of profile-field visibilities together (not just the one
+  // the user changed) so that switching account_privacy to "custom" preserves the
+  // effective visibility of every other field. On an account whose privacy is
+  // "all_users"/unset (the OST2 default), persisting only the changed field would
+  // drop every unset field to "not shared", silently hiding name, certificates, etc.
+  // Mirrors the profile MFE's all_users auto-patch. Routed to patchPreferences via
+  // the extendedProfile multi-key path; persists the displayed effective visibility
+  // ("what you see is saved").
+  handleSubmitVisibility = (name, value) => {
+    const snapshotFields = [
+      'name', 'bio', 'course_certificates', 'country', 'date_joined',
+      'level_of_education', 'language_proficiencies', 'social_links', 'time_zone',
+    ];
+    const snapshot = { account_privacy: 'custom' };
+    snapshotFields.forEach((field) => {
+      snapshot[`visibility.${field}`] = this.getEffectiveVisibility(field);
+    });
+    snapshot[name] = value; // the field the user just changed wins
+    this.props.saveSettings(name, value, snapshot);
+  };
+
+  // The effective visibility a viewer sees for a field, honoring account_privacy:
+  // all_users -> everyone; private -> just me; custom/unset -> the per-field pref
+  // (defaulting to all_users, the site default). Keeps the select accurate so a
+  // private account never shows "Everyone" and get accidentally un-privated on save.
+  getEffectiveVisibility = (apiField) => {
+    const { formValues } = this.props;
+    const privacy = formValues.account_privacy || 'all_users';
+    if (privacy === 'all_users') { return 'all_users'; }
+    if (privacy === 'private') { return 'private'; }
+    return formValues[`visibility.${apiField}`] || 'all_users';
   };
 
   handleSubmitProfileName = (formId, values) => {
@@ -485,6 +538,64 @@ class AccountSettingsPage extends React.Component {
     );
   }
 
+  renderProfileVisibilitySection() {
+    const visibilityOptions = [
+      {
+        value: 'all_users',
+        label: this.props.intl.formatMessage(
+          messages['account.settings.field.visibility.who.everyone'],
+          { siteName: getConfig().SITE_NAME },
+        ),
+      },
+      {
+        value: 'private',
+        label: this.props.intl.formatMessage(messages['account.settings.field.visibility.who.just.me']),
+      },
+    ];
+
+    // The PUBLIC-profile fields that have a per-field visibility preference.
+    // `apiField` is the dotted preference suffix; the redux value lives under
+    // `visibility.<apiField>` (effective default 'all_users' when unset).
+    const visibilityFields = [
+      'name',
+      'bio',
+      'country',
+      'level_of_education',
+      'language_proficiencies',
+      'social_links',
+      'course_certificates',
+    ];
+
+    const visibilityFieldProps = {
+      onChange: this.handleEditableFieldChange,
+      onSubmit: this.handleSubmitVisibility,
+    };
+
+    return (
+      <div className="account-section pt-3 mb-5" id="profile-visibility" ref={this.navLinkRefs['#profile-visibility']}>
+        <h2 className="section-heading h4 mb-3">
+          {this.props.intl.formatMessage(messages['account.settings.section.profile.visibility'])}
+        </h2>
+        <p>{this.props.intl.formatMessage(messages['account.settings.section.profile.visibility.description'])}</p>
+
+        {visibilityFields.map((apiField) => {
+          const name = `visibility.${apiField}`;
+          return (
+            <EditableSelectField
+              key={name}
+              name={name}
+              type="select"
+              value={this.getEffectiveVisibility(apiField)}
+              options={visibilityOptions}
+              label={this.props.intl.formatMessage(messages[`account.settings.field.visibility.${apiField}`])}
+              {...visibilityFieldProps}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   renderContent() {
     const editableFieldProps = {
       onChange: this.handleEditableFieldChange,
@@ -692,6 +803,17 @@ class AccountSettingsPage extends React.Component {
             {this.props.intl.formatMessage(messages['account.settings.section.profile.information'])}
           </h2>
 
+          <ProfilePhotoField />
+          <EditableField
+            name="bio"
+            type="textarea"
+            as="textarea"
+            value={this.props.formValues.bio}
+            label={this.props.intl.formatMessage(messages['account.settings.field.bio'])}
+            emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.bio.empty'])}
+            helpText={this.props.intl.formatMessage(messages['account.settings.field.bio.help.text'])}
+            {...editableFieldProps}
+          />
           <EditableSelectField
             name="level_of_education"
             type="select"
@@ -745,12 +867,6 @@ class AccountSettingsPage extends React.Component {
             )}
           </p>
 
-          {/*
-            Platform set and ordering must match the OST2 profile MFE
-            (frontend-app-profile src/profile/data/selectors.js and
-            src/profile/forms/SocialLinks.jsx) so the account editor lets a
-            learner edit every link shown on their profile.
-          */}
           <EditableField
             name="social_link_blog"
             type="text"
@@ -758,6 +874,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.blog'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.blog.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_linkedin"
@@ -766,6 +883,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.linkedin'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.linkedin.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_github"
@@ -774,6 +892,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.github'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.github.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_gitlab"
@@ -782,6 +901,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.gitlab'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.gitlab.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_mastodon"
@@ -790,6 +910,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.mastodon'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.mastodon.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_bluesky"
@@ -798,6 +919,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.bluesky'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.bluesky.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_twitter"
@@ -806,6 +928,7 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.twitter.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
           <EditableField
             name="social_link_discord"
@@ -814,8 +937,10 @@ class AccountSettingsPage extends React.Component {
             label={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.discord'])}
             emptyLabel={this.props.intl.formatMessage(messages['account.settings.field.social.platform.name.discord.empty'])}
             {...editableFieldProps}
+            onSubmit={this.handleSubmitSocialLink}
           />
         </div>
+        {this.renderProfileVisibilitySection()}
         <div className="border border-light-700" />
         <div className="mt-6" id="notifications" ref={this.navLinkRefs['#notifications']}>
           <NotificationSettings />
@@ -948,6 +1073,11 @@ AccountSettingsPage.propTypes = {
     language_proficiencies: PropTypes.string,
     pending_name_change: PropTypes.string,
     phone_number: PropTypes.string,
+    bio: PropTypes.string,
+    profile_image: PropTypes.shape({
+      has_image: PropTypes.bool,
+      image_url_full: PropTypes.string,
+    }),
     social_link_blog: PropTypes.string,
     social_link_linkedin: PropTypes.string,
     social_link_github: PropTypes.string,
@@ -958,6 +1088,7 @@ AccountSettingsPage.propTypes = {
     social_link_discord: PropTypes.string,
     time_zone: PropTypes.string,
     state: PropTypes.string,
+    account_privacy: PropTypes.string,
     useVerifiedNameForCerts: PropTypes.bool.isRequired,
     verified_name: PropTypes.string,
   }).isRequired,
@@ -996,6 +1127,7 @@ AccountSettingsPage.propTypes = {
   updateDraft: PropTypes.func.isRequired,
   saveMultipleSettings: PropTypes.func.isRequired,
   saveSettings: PropTypes.func.isRequired,
+  saveSettingsFailure: PropTypes.func.isRequired,
   fetchSettings: PropTypes.func.isRequired,
   beginNameChange: PropTypes.func.isRequired,
   fetchCourseList: PropTypes.func.isRequired,
@@ -1066,6 +1198,7 @@ export default withLocation(withNavigate(connect(accountSettingsPageSelector, {
   fetchCourseList,
   fetchSettings,
   saveSettings,
+  saveSettingsFailure,
   saveMultipleSettings,
   updateDraft,
   fetchSiteLanguages,

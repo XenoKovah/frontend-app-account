@@ -26,6 +26,16 @@ import {
   saveMultipleSettingsSuccess,
   saveMultipleSettingsFailure,
   beginNameChange,
+  SAVE_PROFILE_PHOTO,
+  DELETE_PROFILE_PHOTO,
+  saveProfilePhotoBegin,
+  saveProfilePhotoSuccess,
+  saveProfilePhotoReset,
+  saveProfilePhotoFailure,
+  deleteProfilePhotoBegin,
+  deleteProfilePhotoSuccess,
+  deleteProfilePhotoReset,
+  deleteProfilePhotoFailure,
 } from './actions';
 
 // Sub-modules
@@ -45,6 +55,8 @@ import {
   patchSettings,
   getTimeZones,
   getVerifiedNameHistory,
+  postProfilePhoto,
+  deleteProfilePhoto,
 } from './service';
 
 export function* handleFetchSettings() {
@@ -151,6 +163,35 @@ export function* handleSaveMultipleSettings(action) {
   }
 }
 
+export function* handleSaveProfilePhoto(action) {
+  try {
+    yield put(saveProfilePhotoBegin());
+    const { username } = getAuthenticatedUser();
+    const { formData } = action.payload;
+    // The service re-GETs the account after upload, so we get the refreshed
+    // profile_image to merge back into redux values.
+    const account = yield call(postProfilePhoto, username, formData);
+    yield put(saveProfilePhotoSuccess(account.profile_image));
+    yield put(saveProfilePhotoReset());
+  } catch (e) {
+    yield put(saveProfilePhotoFailure(e.message));
+    yield put(saveProfilePhotoReset());
+  }
+}
+
+export function* handleDeleteProfilePhoto() {
+  try {
+    yield put(deleteProfilePhotoBegin());
+    const { username } = getAuthenticatedUser();
+    const account = yield call(deleteProfilePhoto, username);
+    yield put(deleteProfilePhotoSuccess(account.profile_image));
+    yield put(deleteProfilePhotoReset());
+  } catch (e) {
+    yield put(deleteProfilePhotoFailure(e.message));
+    yield put(deleteProfilePhotoReset());
+  }
+}
+
 export function* handleFetchTimeZones(action) {
   const response = yield call(getTimeZones, action.payload.country);
   yield put(fetchTimeZonesSuccess(response, action.payload.country));
@@ -160,6 +201,8 @@ export default function* saga() {
   yield takeEvery(FETCH_SETTINGS.BASE, handleFetchSettings);
   yield takeEvery(SAVE_SETTINGS.BASE, handleSaveSettings);
   yield takeEvery(SAVE_MULTIPLE_SETTINGS.BASE, handleSaveMultipleSettings);
+  yield takeEvery(SAVE_PROFILE_PHOTO.BASE, handleSaveProfilePhoto);
+  yield takeEvery(DELETE_PROFILE_PHOTO.BASE, handleDeleteProfilePhoto);
   yield takeEvery(FETCH_TIME_ZONES.BASE, handleFetchTimeZones);
   yield all([
     deleteAccountSaga(),

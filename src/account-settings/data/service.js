@@ -10,13 +10,10 @@ import { getThirdPartyAuthProviders } from '../third-party-auth';
 import { postVerifiedNameConfig } from '../certificate-preference/data/service';
 import { FIELD_LABELS } from './constants';
 
-// Keep this list in lock-step with the OST2 profile MFE
-// (frontend-app-profile src/profile/data/selectors.js knownPlatforms and
-// src/profile/forms/SocialLinks.jsx platformDisplayInfo). The profile editor
-// and this account editor must offer the exact same set of platforms so a
-// learner can edit every link they see on their profile. Facebook was
-// intentionally dropped; blog/github/gitlab/mastodon/bluesky/discord were
-// added; twitter is kept (the backend accepts both x.com and twitter.com URLs).
+// The 8 platforms the public profile MFE renders (see frontend-app-profile
+// SocialLinks.jsx / selectors.js `knownPlatforms`). The `id` strings must match
+// the platform identifiers the accounts API stores. `key` is the redux/form
+// field name the account MFE uses for that platform's editable text input.
 const SOCIAL_PLATFORMS = [
   { id: 'blog', key: 'social_link_blog' },
   { id: 'linkedin', key: 'social_link_linkedin' },
@@ -27,6 +24,26 @@ const SOCIAL_PLATFORMS = [
   { id: 'twitter', key: 'social_link_twitter' },
   { id: 'discord', key: 'social_link_discord' },
 ];
+
+// Keys that must be routed to the user-preferences API (patchPreferences)
+// rather than the accounts API (patchAccount). Per-field visibility lives in
+// preferences under dotted `visibility.<field>` keys, alongside account_privacy.
+const isVisibilityKey = (key) => key.startsWith('visibility.') || key === 'account_privacy';
+
+// Defense in depth: never turn a profile-supplied value into a clickable link
+// unless it is clearly an http(s) URL. Ported from the profile MFE so the
+// account editor validates the same way the public profile renders.
+export const isSafeHttpUrl = (value) => {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  // Drop the whitespace/control chars browsers ignore when resolving a scheme.
+  const cleaned = Array.from(value)
+    .filter((ch) => ch.charCodeAt(0) > 0x20 && ch.charCodeAt(0) !== 0x7f)
+    .join('')
+    .toLowerCase();
+  return cleaned.startsWith('http://') || cleaned.startsWith('https://');
+};
 
 function unpackAccountResponseData(data) {
   const unpackedData = data;
@@ -59,7 +76,13 @@ function packAccountCommitData(commitData) {
       return;
     }
 
-    packedData.social_links = [{ platform: id, social_link: commitData[key] }];
+    // Accumulate every supplied platform into a single social_links array.
+    // (The old code reassigned packedData.social_links on each iteration, so a
+    // multi-platform commit only ever sent the last platform to the API.)
+    if (!Array.isArray(packedData.social_links)) {
+      packedData.social_links = [];
+    }
+    packedData.social_links.push({ platform: id, social_link: commitData[key] });
     delete packedData[key];
   });
 
@@ -114,6 +137,31 @@ export async function patchAccount(username, commitValues) {
     });
 
   return unpackAccountResponseData(data);
+}
+
+export async function postProfilePhoto(username, formData) {
+  const requestConfig = { headers: { 'Content-Type': 'multipart/form-data' } };
+  const requestUrl = `${getConfig().LMS_BASE_URL}/api/user/v1/accounts/${username}/image`;
+
+  // The image endpoint returns 204 with no body, so re-fetch the account to
+  // pick up the freshly-generated profile_image URLs.
+  await getAuthenticatedHttpClient()
+    .post(requestUrl, formData, requestConfig)
+    .catch(handleRequestError);
+
+  return getAccount(username);
+}
+
+export async function deleteProfilePhoto(username) {
+  const requestUrl = `${getConfig().LMS_BASE_URL}/api/user/v1/accounts/${username}/image`;
+
+  // The image endpoint returns 204 with no body, so re-fetch the account to
+  // pick up the reverted (default) profile_image URLs.
+  await getAuthenticatedHttpClient()
+    .delete(requestUrl)
+    .catch(handleRequestError);
+
+  return getAccount(username);
 }
 
 export async function getPreferences(username) {
@@ -259,12 +307,17 @@ export async function patchSettings(username, commitValues) {
   // user/v1/preferences where it does update. This is the one we use.
   const preferenceKeys = ['time_zone'];
   const certificateKeys = ['useVerifiedNameForCerts'];
+  // Per-field visibility (visibility.<field>) and account_privacy are stored in
+  // the user-preferences API, not the accounts API. Route them dynamically so
+  // any visibility.<field> key (and account_privacy) goes to patchPreferences.
+  const visibilityKeys = Object.keys(commitValues).filter(isVisibilityKey);
   const accountCommitValues = omit(
     commitValues,
     preferenceKeys,
     certificateKeys,
+    visibilityKeys,
   );
-  const preferenceCommitValues = pick(commitValues, preferenceKeys);
+  const preferenceCommitValues = pick(commitValues, [...preferenceKeys, ...visibilityKeys]);
   const certCommitValues = pick(commitValues, certificateKeys);
   const patchRequests = [];
 

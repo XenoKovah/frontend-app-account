@@ -512,14 +512,100 @@ const messages = defineMessages({
   'account.settings.field.social.platform.name.twitter': {
     id: 'account.settings.field.social.platform.name.twitter',
     defaultMessage: 'X',
-    description: 'Label for the X (formerly Twitter) social media link',
+    description: 'Label for Twitter',
   },
   'account.settings.field.social.platform.name.twitter.empty': {
     id: 'account.settings.field.social.platform.name.twitter.empty',
     defaultMessage: 'Add X profile',
-    description: 'Placeholder for an empty X (formerly Twitter) field',
+    description: 'Placeholder for an empty Twitter field',
   },
 
+  'account.settings.editable.field.action.save': {
+    id: 'account.settings.editable.field.action.save',
+    defaultMessage: 'Save',
+    description: 'The save button on an editable field',
+  },
+  'account.settings.editable.field.action.cancel': {
+    id: 'account.settings.editable.field.action.cancel',
+    defaultMessage: 'Cancel',
+    description: 'The cancel button on an editable field',
+  },
+  'account.settings.editable.field.action.edit': {
+    id: 'account.settings.editable.field.action.edit',
+    defaultMessage: 'Edit',
+    description: 'The edit button on an editable field',
+  },
+  'account.settings.static.field.empty': {
+    id: 'account.settings.static.field.empty',
+    defaultMessage: 'No value set. Contact your {enterprise} administrator to make changes.',
+    description: 'The placeholder for an empty but uneditable field',
+  },
+  'account.settings.static.field.empty.no.admin': {
+    id: 'account.settings.static.field.empty.no.admin',
+    defaultMessage: 'No value set.',
+    description: 'The placeholder for an empty but uneditable field when there is no administrator',
+  },
+  'notification.preferences.notifications.label': {
+    id: 'notification.preferences.notifications.label',
+    defaultMessage: 'Notifications',
+    description: 'Label for Notifications',
+  },
+  'account.settings.field.work.experience': {
+    id: 'account.settings.work.experience',
+    defaultMessage: 'Work Experience',
+    description: 'Label for account settings Work experience field.',
+  },
+  'account.settings.field.work.experience.empty': {
+    id: 'account.settings.field.work.experience.empty',
+    defaultMessage: 'Add work experience',
+    description: 'Placeholder for empty account settings work experience field.',
+  },
+  'account.settings.field.work.experience.options.empty': {
+    id: 'account.settings.field.work.experience.options.empty',
+    defaultMessage: 'Select work experience',
+    description: 'Placeholder for the work experience levels dropdown.',
+  },
+
+  // Profile photo (B1)
+  'account.settings.field.profile.image': {
+    id: 'account.settings.field.profile.image',
+    defaultMessage: 'Profile photo',
+    description: 'Label for the profile photo field.',
+  },
+  'account.settings.field.profile.image.alt': {
+    id: 'account.settings.field.profile.image.alt',
+    defaultMessage: 'Your profile photo',
+    description: 'Alt text for the profile photo image.',
+  },
+  'account.settings.field.profile.image.upload': {
+    id: 'account.settings.field.profile.image.upload',
+    defaultMessage: 'Upload photo',
+    description: 'Button to upload a new profile photo.',
+  },
+  'account.settings.field.profile.image.remove': {
+    id: 'account.settings.field.profile.image.remove',
+    defaultMessage: 'Remove',
+    description: 'Button to remove the current profile photo.',
+  },
+
+  // Bio (B2)
+  'account.settings.field.bio': {
+    id: 'account.settings.field.bio',
+    defaultMessage: 'About me',
+    description: 'Label for the account settings bio field.',
+  },
+  'account.settings.field.bio.empty': {
+    id: 'account.settings.field.bio.empty',
+    defaultMessage: 'Add a short bio',
+    description: 'Placeholder for an empty account settings bio field.',
+  },
+  'account.settings.field.bio.help.text': {
+    id: 'account.settings.field.bio.help.text',
+    defaultMessage: 'Tell other learners a little about yourself: where you live, what your interests are, why you are taking courses, or what you hope to learn.',
+    description: 'Help text for the account settings bio field.',
+  },
+
+  // Social links (B3)
   'account.settings.field.social.platform.name.blog': {
     id: 'account.settings.field.social.platform.name.blog',
     defaultMessage: 'Blog',
@@ -527,7 +613,7 @@ const messages = defineMessages({
   },
   'account.settings.field.social.platform.name.blog.empty': {
     id: 'account.settings.field.social.platform.name.blog.empty',
-    defaultMessage: 'Add Blog',
+    defaultMessage: 'Add Blog URL',
     description: 'Placeholder for an empty Blog field',
   },
   'account.settings.field.social.platform.name.github': {
@@ -580,50 +666,67 @@ const messages = defineMessages({
     defaultMessage: 'Add Discord profile',
     description: 'Placeholder for an empty Discord field',
   },
-  'account.settings.editable.field.action.save': {
-    id: 'account.settings.editable.field.action.save',
-    defaultMessage: 'Save',
-    description: 'The save button on an editable field',
+  'account.settings.field.social.url.invalid': {
+    id: 'account.settings.field.social.url.invalid',
+    defaultMessage: 'Enter a valid URL starting with http:// or https://',
+    description: 'Validation error shown when a social link is not a valid http(s) URL.',
   },
-  'account.settings.editable.field.action.cancel': {
-    id: 'account.settings.editable.field.action.cancel',
-    defaultMessage: 'Cancel',
-    description: 'The cancel button on an editable field',
+
+  // Per-field visibility (B4)
+  'account.settings.section.profile.visibility': {
+    id: 'account.settings.section.profile.visibility',
+    defaultMessage: 'Profile visibility',
+    description: 'The profile visibility section heading.',
   },
-  'account.settings.editable.field.action.edit': {
-    id: 'account.settings.editable.field.action.edit',
-    defaultMessage: 'Edit',
-    description: 'The edit button on an editable field',
+  'account.settings.section.profile.visibility.description': {
+    id: 'account.settings.section.profile.visibility.description',
+    defaultMessage: 'Choose who can see each part of your public profile.',
+    description: 'The profile visibility section description.',
   },
-  'account.settings.static.field.empty': {
-    id: 'account.settings.static.field.empty',
-    defaultMessage: 'No value set. Contact your {enterprise} administrator to make changes.',
-    description: 'The placeholder for an empty but uneditable field',
+  'account.settings.field.visibility.who.everyone': {
+    id: 'account.settings.field.visibility.who.everyone',
+    defaultMessage: 'Everyone on {siteName}',
+    description: 'Option indicating a profile field is visible to all logged-in users.',
   },
-  'account.settings.static.field.empty.no.admin': {
-    id: 'account.settings.static.field.empty.no.admin',
-    defaultMessage: 'No value set.',
-    description: 'The placeholder for an empty but uneditable field when there is no administrator',
+  'account.settings.field.visibility.who.just.me': {
+    id: 'account.settings.field.visibility.who.just.me',
+    defaultMessage: 'Just me',
+    description: 'Option indicating a profile field is visible only to the owner.',
   },
-  'notification.preferences.notifications.label': {
-    id: 'notification.preferences.notifications.label',
-    defaultMessage: 'Notifications',
-    description: 'Label for Notifications',
+  'account.settings.field.visibility.name': {
+    id: 'account.settings.field.visibility.name',
+    defaultMessage: 'Who can see your full name?',
+    description: 'Label for the name visibility selector.',
   },
-  'account.settings.field.work.experience': {
-    id: 'account.settings.work.experience',
-    defaultMessage: 'Work Experience',
-    description: 'Label for account settings Work experience field.',
+  'account.settings.field.visibility.bio': {
+    id: 'account.settings.field.visibility.bio',
+    defaultMessage: 'Who can see your bio?',
+    description: 'Label for the bio visibility selector.',
   },
-  'account.settings.field.work.experience.empty': {
-    id: 'account.settings.field.work.experience.empty',
-    defaultMessage: 'Add work experience',
-    description: 'Placeholder for empty account settings work experience field.',
+  'account.settings.field.visibility.country': {
+    id: 'account.settings.field.visibility.country',
+    defaultMessage: 'Who can see your country?',
+    description: 'Label for the country visibility selector.',
   },
-  'account.settings.field.work.experience.options.empty': {
-    id: 'account.settings.field.work.experience.options.empty',
-    defaultMessage: 'Select work experience',
-    description: 'Placeholder for the work experience levels dropdown.',
+  'account.settings.field.visibility.level_of_education': {
+    id: 'account.settings.field.visibility.level_of_education',
+    defaultMessage: 'Who can see your education?',
+    description: 'Label for the education visibility selector.',
+  },
+  'account.settings.field.visibility.language_proficiencies': {
+    id: 'account.settings.field.visibility.language_proficiencies',
+    defaultMessage: 'Who can see your spoken language?',
+    description: 'Label for the spoken language visibility selector.',
+  },
+  'account.settings.field.visibility.social_links': {
+    id: 'account.settings.field.visibility.social_links',
+    defaultMessage: 'Who can see your social links?',
+    description: 'Label for the social links visibility selector.',
+  },
+  'account.settings.field.visibility.course_certificates': {
+    id: 'account.settings.field.visibility.course_certificates',
+    defaultMessage: 'Who can see your certificates?',
+    description: 'Label for the certificates visibility selector.',
   },
 });
 

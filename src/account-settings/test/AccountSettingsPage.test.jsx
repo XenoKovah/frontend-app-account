@@ -109,42 +109,122 @@ describe('AccountSettingsPage', () => {
     fireEvent.click(submitButton);
   });
 
-  it('renders the social media links section with the OST2 platform set', () => {
-    // Must stay in lock-step with the profile MFE's platform set/order.
-    const expectedPlatformLabels = [
-      'Blog',
-      'LinkedIn',
-      'GitHub',
-      'GitLab',
-      'Mastodon',
-      'Bluesky',
-      'X',
-      'Discord',
-    ];
+  it('renders the profile photo field (B1)', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    expect(screen.getByText('Profile photo')).toBeInTheDocument();
+    // has_image is true in the mock, so both Upload and Remove are shown.
+    expect(screen.getByText('Upload photo')).toBeInTheDocument();
+    expect(screen.getByText('Remove')).toBeInTheDocument();
+  });
 
-    const {
-      getByText, queryByText, getByRole,
-    } = render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+  it('renders the bio field (B2)', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    expect(screen.getByText('About me')).toBeInTheDocument();
+  });
 
-    expect(getByRole('heading', { name: 'Social Media Links' })).toBeInTheDocument();
-
-    // Every platform the profile shows must be editable here.
-    expectedPlatformLabels.forEach((label) => {
-      expect(getByText(label)).toBeInTheDocument();
+  it('renders the 8 social link fields (B3)', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    ['Blog', 'LinkedIn', 'GitHub', 'GitLab', 'Mastodon', 'Bluesky', 'X', 'Discord'].forEach((label) => {
+      expect(screen.getByText(label)).toBeInTheDocument();
     });
+    // Facebook was dropped.
+    expect(screen.queryByText('Facebook')).toBeNull();
+  });
 
-    // ...and in the same order as the profile MFE. Reading the section's text
-    // content gives us the labels in DOM order, so their indices must be
-    // strictly increasing.
-    const sectionText = document.getElementById('social-media').textContent;
-    const positions = expectedPlatformLabels.map(label => sectionText.indexOf(label));
-    positions.forEach((pos) => {
-      expect(pos).toBeGreaterThanOrEqual(0);
+  it('renders the profile visibility section with all public-field selectors (B4)', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    // "Profile visibility" appears both as the section heading and the JumpNav link.
+    expect(screen.getAllByText('Profile visibility').length).toBeGreaterThan(0);
+    [
+      'Who can see your full name?',
+      'Who can see your bio?',
+      'Who can see your country?',
+      'Who can see your education?',
+      'Who can see your spoken language?',
+      'Who can see your social links?',
+      'Who can see your certificates?',
+    ].forEach((label) => {
+      expect(screen.getByText(label)).toBeInTheDocument();
     });
-    const sortedPositions = [...positions].sort((a, b) => a - b);
-    expect(positions).toEqual(sortedPositions);
+  });
 
-    // Facebook was intentionally removed and must not appear.
-    expect(queryByText('Facebook')).not.toBeInTheDocument();
+  it('dispatches a SAVE_SETTINGS action carrying account_privacy:custom when a visibility field is saved (B4)', () => {
+    // The selects are controlled by store-derived formValues, so seed the
+    // committed value the form will submit (FormData reads the rendered value).
+    store = mockStore({
+      ...mockData,
+      accountSettings: {
+        ...mockData.accountSettings,
+        openFormId: 'visibility.bio',
+        values: {
+          ...mockData.accountSettings.values, account_privacy: 'custom', 'visibility.bio': 'private',
+        },
+      },
+    });
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+
+    fireEvent.click(screen.getByText('Save'));
+
+    const saveAction = store.getActions().find(
+      (a) => a.type === 'ACCOUNT_SETTINGS__SAVE_SETTINGS' && a.payload.formId === 'visibility.bio',
+    );
+    expect(saveAction).toBeDefined();
+    // The changed field + account_privacy:custom go through the extendedProfile path...
+    expect(saveAction.payload.commitValues).toEqual('private');
+    expect(saveAction.payload.extendedProfile).toMatchObject({
+      'visibility.bio': 'private',
+      account_privacy: 'custom',
+    });
+    // ...alongside a snapshot of every other field's visibility, so switching to
+    // custom doesn't silently hide the unset fields.
+    expect(Object.keys(saveAction.payload.extendedProfile)).toEqual(
+      expect.arrayContaining([
+        'visibility.name', 'visibility.course_certificates', 'visibility.social_links',
+      ]),
+    );
+  });
+
+  it('dispatches a SAVE_SETTINGS action when a social link is saved with a valid URL (B3)', () => {
+    store = mockStore({
+      ...mockData,
+      accountSettings: {
+        ...mockData.accountSettings,
+        openFormId: 'social_link_github',
+        values: { ...mockData.accountSettings.values, social_link_github: 'https://github.com/new' },
+      },
+    });
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+
+    fireEvent.click(screen.getByText('Save'));
+
+    const saveAction = store.getActions().find(
+      (a) => a.type === 'ACCOUNT_SETTINGS__SAVE_SETTINGS' && a.payload.formId === 'social_link_github',
+    );
+    expect(saveAction).toBeDefined();
+    expect(saveAction.payload.commitValues).toEqual('https://github.com/new');
+  });
+
+  it('dispatches a SAVE_SETTINGS_FAILURE action when a social link is saved with an invalid URL (B3)', () => {
+    store = mockStore({
+      ...mockData,
+      accountSettings: {
+        ...mockData.accountSettings,
+        openFormId: 'social_link_github',
+        // eslint-disable-next-line no-script-url
+        values: { ...mockData.accountSettings.values, social_link_github: 'javascript:alert(1)' },
+      },
+    });
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+
+    fireEvent.click(screen.getByText('Save'));
+
+    // No save action; instead an inline validation failure is dispatched.
+    const githubSave = store.getActions().find(
+      (a) => a.type === 'ACCOUNT_SETTINGS__SAVE_SETTINGS' && a.payload.formId === 'social_link_github',
+    );
+    expect(githubSave).toBeUndefined();
+    const failureAction = store.getActions().find((a) => a.type === 'ACCOUNT_SETTINGS__SAVE_SETTINGS__FAILURE');
+    expect(failureAction).toBeDefined();
+    expect(failureAction.payload.errors.social_link_github).toBeDefined();
   });
 });

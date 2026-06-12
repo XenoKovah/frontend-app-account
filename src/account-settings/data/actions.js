@@ -3,6 +3,8 @@ import { AsyncActionType } from './utils';
 export const FETCH_SETTINGS = new AsyncActionType('ACCOUNT_SETTINGS', 'FETCH_SETTINGS');
 export const SAVE_SETTINGS = new AsyncActionType('ACCOUNT_SETTINGS', 'SAVE_SETTINGS');
 export const SAVE_MULTIPLE_SETTINGS = new AsyncActionType('ACCOUNT_SETTINGS', 'SAVE_MULTIPLE_SETTINGS');
+export const SAVE_PROFILE_PHOTO = new AsyncActionType('ACCOUNT_SETTINGS', 'SAVE_PROFILE_PHOTO');
+export const DELETE_PROFILE_PHOTO = new AsyncActionType('ACCOUNT_SETTINGS', 'DELETE_PROFILE_PHOTO');
 export const FETCH_TIME_ZONES = new AsyncActionType('ACCOUNT_SETTINGS', 'FETCH_TIME_ZONES');
 export const SAVE_PREVIOUS_SITE_LANGUAGE = 'SAVE_PREVIOUS_SITE_LANGUAGE';
 export const OPEN_FORM = 'OPEN_FORM';
@@ -105,6 +107,53 @@ export const saveSettingsFailure = ({ fieldErrors, message }) => ({
 export const savePreviousSiteLanguage = previousSiteLanguage => ({
   type: SAVE_PREVIOUS_SITE_LANGUAGE,
   payload: { previousSiteLanguage },
+});
+
+// SAVE / DELETE PROFILE PHOTO ACTIONS
+
+export const saveProfilePhoto = (formData) => ({
+  type: SAVE_PROFILE_PHOTO.BASE,
+  payload: { formData },
+});
+
+export const saveProfilePhotoBegin = () => ({
+  type: SAVE_PROFILE_PHOTO.BEGIN,
+});
+
+export const saveProfilePhotoSuccess = (profileImage) => ({
+  type: SAVE_PROFILE_PHOTO.SUCCESS,
+  payload: { profileImage },
+});
+
+export const saveProfilePhotoReset = () => ({
+  type: SAVE_PROFILE_PHOTO.RESET,
+});
+
+export const saveProfilePhotoFailure = (error) => ({
+  type: SAVE_PROFILE_PHOTO.FAILURE,
+  payload: { error },
+});
+
+export const deleteProfilePhoto = () => ({
+  type: DELETE_PROFILE_PHOTO.BASE,
+});
+
+export const deleteProfilePhotoBegin = () => ({
+  type: DELETE_PROFILE_PHOTO.BEGIN,
+});
+
+export const deleteProfilePhotoSuccess = (profileImage) => ({
+  type: DELETE_PROFILE_PHOTO.SUCCESS,
+  payload: { profileImage },
+});
+
+export const deleteProfilePhotoReset = () => ({
+  type: DELETE_PROFILE_PHOTO.RESET,
+});
+
+export const deleteProfilePhotoFailure = (error) => ({
+  type: DELETE_PROFILE_PHOTO.FAILURE,
+  payload: { error },
 });
 
 export const saveMultipleSettings = (settingsArray, form = null) => ({

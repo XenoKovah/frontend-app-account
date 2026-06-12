@@ -19,6 +19,7 @@ const JumpNav = ({
           'basic-information',
           'profile-information',
           'social-media',
+          'profile-visibility',
           'notifications',
           'site-preferences',
           'linked-accounts',
@@ -41,6 +42,11 @@ const JumpNav = ({
         <li>
           <NavHashLink to="#social-media">
             {intl.formatMessage(messages['account.settings.section.social.media'])}
+          </NavHashLink>
+        </li>
+        <li>
+          <NavHashLink to="#profile-visibility">
+            {intl.formatMessage(messages['account.settings.section.profile.visibility'])}
           </NavHashLink>
         </li>
         <li>

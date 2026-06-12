@@ -126,6 +126,16 @@ const saveStateSelector = createSelector(
   accountSettings => accountSettings.saveState,
 );
 
+const savePhotoStateSelector = createSelector(
+  accountSettingsSelector,
+  accountSettings => accountSettings.savePhotoState,
+);
+
+const photoErrorSelector = createSelector(
+  accountSettingsSelector,
+  accountSettings => accountSettings.errors.photo || null,
+);
+
 export const editableFieldSelector = createStructuredSelector({
   error: editableFieldErrorSelector,
   confirmationValue: editableFieldConfirmationValuesSelector,
@@ -169,6 +179,10 @@ export const formValuesSelector = createSelector(
     Object.entries(values).forEach(([name, value]) => {
       if (typeof value === 'boolean') {
         formValues[name] = chooseFormValue(drafts[name], value);
+      } else if (name === 'profile_image') {
+        // profile_image is an object ({ has_image, image_url_full, ... }); pass it
+        // through unchanged so it is not coerced to '' like scalar values below.
+        formValues[name] = value;
       } else if (typeof value === 'object' && name === 'extended_profile' && value !== null) {
         const extendedProfile = value.slice();
         const draftsKeys = Object.keys(drafts);
@@ -190,6 +204,17 @@ export const formValuesSelector = createSelector(
     return formValues;
   },
 );
+
+const profileImageSelector = createSelector(
+  formValuesSelector,
+  formValues => formValues.profile_image || null,
+);
+
+export const profilePhotoSelector = createStructuredSelector({
+  profileImage: profileImageSelector,
+  savePhotoState: savePhotoStateSelector,
+  photoError: photoErrorSelector,
+});
 
 const transformTimeZonesToOptions = timeZoneArr => timeZoneArr
   .map(({ time_zone, description }) => ({ // eslint-disable-line camelcase

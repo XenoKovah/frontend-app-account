@@ -8,6 +8,8 @@ import {
   UPDATE_DRAFT,
   RESET_DRAFTS,
   SAVE_MULTIPLE_SETTINGS,
+  SAVE_PROFILE_PHOTO,
+  DELETE_PROFILE_PHOTO,
   BEGIN_NAME_CHANGE,
 } from './actions';
 
@@ -27,6 +29,7 @@ export const defaultState = {
   confirmationValues: {},
   drafts: {},
   saveState: null,
+  savePhotoState: null,
   timeZones: [],
   countryTimeZones: [],
   previousSiteLanguage: null,
@@ -177,6 +180,35 @@ const reducer = (state = defaultState, action = {}) => {
         ...state,
         saveState: 'error',
         errors: { ...state.errors, ...action.payload.errors },
+      };
+
+    case SAVE_PROFILE_PHOTO.BEGIN:
+    case DELETE_PROFILE_PHOTO.BEGIN:
+      return {
+        ...state,
+        savePhotoState: 'pending',
+        errors: {},
+      };
+    case SAVE_PROFILE_PHOTO.SUCCESS:
+    case DELETE_PROFILE_PHOTO.SUCCESS:
+      return {
+        ...state,
+        savePhotoState: 'complete',
+        values: { ...state.values, profile_image: action.payload.profileImage },
+        errors: {},
+      };
+    case SAVE_PROFILE_PHOTO.FAILURE:
+    case DELETE_PROFILE_PHOTO.FAILURE:
+      return {
+        ...state,
+        savePhotoState: 'error',
+        errors: { ...state.errors, photo: action.payload.error },
+      };
+    case SAVE_PROFILE_PHOTO.RESET:
+    case DELETE_PROFILE_PHOTO.RESET:
+      return {
+        ...state,
+        savePhotoState: null,
       };
 
     case FETCH_TIME_ZONES.SUCCESS:
