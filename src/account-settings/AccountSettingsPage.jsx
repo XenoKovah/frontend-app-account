@@ -228,6 +228,7 @@ class AccountSettingsPage extends React.Component {
     const snapshotFields = [
       'name', 'bio', 'course_certificates', 'country', 'date_joined',
       'level_of_education', 'language_proficiencies', 'social_links', 'time_zone',
+      'accomplishments',
     ];
     const snapshot = { account_privacy: 'custom' };
     snapshotFields.forEach((field) => {
@@ -565,6 +566,12 @@ class AccountSettingsPage extends React.Component {
       'social_links',
       'course_certificates',
     ];
+    // The RGG "Earned Accomplishments" widget only renders when gamification
+    // student UI is enabled (RGG_STUDENT_UI_VISIBLE), so only offer its visibility
+    // control then -- mirrors how the gamification settings section appears/hides.
+    if (getConfig().RGG_STUDENT_UI_VISIBLE) {
+      visibilityFields.push('accomplishments');
+    }
 
     const visibilityFieldProps = {
       onChange: this.handleEditableFieldChange,

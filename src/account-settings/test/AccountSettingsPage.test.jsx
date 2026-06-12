@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import { IntlProvider, injectIntl } from '@edx/frontend-platform/i18n';
+import { mergeConfig } from '@edx/frontend-platform';
 
 import AccountSettingsPage from '../AccountSettingsPage';
 import mockData from './mockData';
@@ -146,6 +147,15 @@ describe('AccountSettingsPage', () => {
     ].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
+    // The Accomplishments row is RGG-gated and hidden when RGG_STUDENT_UI_VISIBLE is off (the default).
+    expect(screen.queryByText('Who can see your Accomplishments?')).toBeNull();
+  });
+
+  it('shows the Accomplishments visibility row only when RGG student UI is enabled (B4)', () => {
+    mergeConfig({ RGG_STUDENT_UI_VISIBLE: true });
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    expect(screen.getByText('Who can see your Accomplishments?')).toBeInTheDocument();
+    mergeConfig({ RGG_STUDENT_UI_VISIBLE: false }); // reset so it doesn't leak to other tests
   });
 
   it('dispatches a SAVE_SETTINGS action carrying account_privacy:custom when a visibility field is saved (B4)', () => {

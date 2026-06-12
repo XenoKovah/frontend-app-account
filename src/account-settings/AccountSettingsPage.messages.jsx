@@ -728,6 +728,11 @@ const messages = defineMessages({
     defaultMessage: 'Who can see your certificates?',
     description: 'Label for the certificates visibility selector.',
   },
+  'account.settings.field.visibility.accomplishments': {
+    id: 'account.settings.field.visibility.accomplishments',
+    defaultMessage: 'Who can see your Accomplishments?',
+    description: 'Label for the accomplishments (earned badges) visibility selector.',
+  },
 });
 
 export default messages;
