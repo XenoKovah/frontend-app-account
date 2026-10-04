@@ -125,7 +125,7 @@ describe('AccountSettingsPage', () => {
 
   it('renders the 8 social link fields (B3)', () => {
     render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
-    ['Blog', 'LinkedIn', 'GitHub', 'GitLab', 'Mastodon', 'Bluesky', 'X', 'Discord'].forEach((label) => {
+    ['Personal website', 'LinkedIn', 'GitHub', 'GitLab', 'Mastodon', 'Bluesky', 'X', 'Discord'].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
     // Facebook was dropped.

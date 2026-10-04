@@ -486,13 +486,13 @@ const messages = defineMessages({
 
   'account.settings.section.social.media': {
     id: 'account.settings.section.social.media',
-    defaultMessage: 'Social Media Links',
-    description: 'Section header for social media links settings',
+    defaultMessage: 'Web Links',
+    description: 'Section header for web links settings',
   },
   'account.settings.section.social.media.description': {
     id: 'account.settings.section.social.media.description',
-    defaultMessage: 'Optionally, link your personal accounts to the social media icons on your {siteName} profile.',
-    description: 'Section subheader for social media links settings',
+    defaultMessage: 'Optionally, link your personal web URLs to your {siteName} profile.',
+    description: 'Section subheader for web links settings',
   },
   'account.settings.field.social.platform.name.linkedin': {
     id: 'account.settings.field.social.platform.name.linkedin',
@@ -608,13 +608,13 @@ const messages = defineMessages({
   // Social links (B3)
   'account.settings.field.social.platform.name.blog': {
     id: 'account.settings.field.social.platform.name.blog',
-    defaultMessage: 'Blog',
-    description: 'Label for Blog',
+    defaultMessage: 'Personal website',
+    description: 'Label for Personal website',
   },
   'account.settings.field.social.platform.name.blog.empty': {
     id: 'account.settings.field.social.platform.name.blog.empty',
-    defaultMessage: 'Add Blog URL',
-    description: 'Placeholder for an empty Blog field',
+    defaultMessage: 'Add Personal Website URL',
+    description: 'Placeholder for an empty Personal website field',
   },
   'account.settings.field.social.platform.name.github': {
     id: 'account.settings.field.social.platform.name.github',
