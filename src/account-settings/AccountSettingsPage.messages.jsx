@@ -468,6 +468,31 @@ const messages = defineMessages({
     defaultMessage: 'Select the time zone for displaying course dates. If you do not specify a time zone, course dates, including assignment deadlines, will be displayed in your browser’s local time zone.',
     description: 'Description for time zone settings field.',
   },
+  'account.settings.field.email.preferences': {
+    id: 'account.settings.field.email.preferences',
+    defaultMessage: 'Email Preferences',
+    description: 'Label for the site-wide email preference field.',
+  },
+  'account.settings.field.email.preferences.all': {
+    id: 'account.settings.field.email.preferences.all',
+    defaultMessage: 'Receive all emails',
+    description: 'Email preference option: site-wide emails and emails from course instructors.',
+  },
+  'account.settings.field.email.preferences.course': {
+    id: 'account.settings.field.email.preferences.course',
+    defaultMessage: 'Receive only emails sent to students enrolled in a course',
+    description: 'Email preference option: only emails that instructors send to the learners of a course.',
+  },
+  'account.settings.field.email.preferences.none': {
+    id: 'account.settings.field.email.preferences.none',
+    defaultMessage: 'Receive no emails',
+    description: 'Email preference option: neither site-wide emails nor emails from course instructors.',
+  },
+  'account.settings.field.email.preferences.description': {
+    id: 'account.settings.field.email.preferences.description',
+    defaultMessage: 'Choose which emails you receive from {siteName}. "Receive all emails" includes announcements sent to everyone on the site as well as emails from the instructors of the courses you are enrolled in. Emails about your account, such as password resets, are always sent.',
+    description: 'Description for the site-wide email preference field.',
+  },
   'account.settings.field.time.zone.default': {
     id: 'account.settings.field.time.zone.default',
     defaultMessage: 'Default (Local Time Zone)',

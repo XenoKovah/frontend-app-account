@@ -28,7 +28,7 @@ import {
   beginNameChange,
 } from './data/actions';
 import { accountSettingsPageSelector } from './data/selectors';
-import { isSafeHttpUrl } from './data/service';
+import { EMAIL_PREFERENCE_DEFAULT, EMAIL_PREFERENCE_KEY, isSafeHttpUrl } from './data/service';
 import PageLoading from './PageLoading';
 import JumpNav from './JumpNav';
 import DeleteAccount from './delete-account';
@@ -74,6 +74,7 @@ class AccountSettingsPage extends React.Component {
       '#profile-visibility': React.createRef(),
       '#notifications': React.createRef(),
       '#site-preferences': React.createRef(),
+      '#email-preferences': React.createRef(),
       '#linked-accounts': React.createRef(),
       '#delete-account': React.createRef(),
     };
@@ -633,6 +634,11 @@ class AccountSettingsPage extends React.Component {
       this.context.locale,
     );
 
+    const emailPreferenceOptions = ['all', 'course', 'none'].map(value => ({
+      value,
+      label: this.props.intl.formatMessage(messages[`account.settings.field.email.preferences.${value}`]),
+    }));
+
     const hasLinkedTPA = findIndex(this.props.tpaProviders, provider => provider.connected) >= 0;
 
     // if user is under 13 and does not have cookie set
@@ -982,6 +988,20 @@ class AccountSettingsPage extends React.Component {
               this.handleSubmit(formId, value || null);
             }}
           />
+          <div id="email-preferences" ref={this.navLinkRefs['#email-preferences']}>
+            <EditableSelectField
+              name={EMAIL_PREFERENCE_KEY}
+              type="select"
+              value={this.props.formValues[EMAIL_PREFERENCE_KEY] || EMAIL_PREFERENCE_DEFAULT}
+              options={emailPreferenceOptions}
+              label={this.props.intl.formatMessage(messages['account.settings.field.email.preferences'])}
+              helpText={this.props.intl.formatMessage(
+                messages['account.settings.field.email.preferences.description'],
+                { siteName: getConfig().SITE_NAME },
+              )}
+              {...editableFieldProps}
+            />
+          </div>
         </div>
 
         <div className="account-section pt-3 mb-5" id="linked-accounts" ref={this.navLinkRefs['#linked-accounts']}>
@@ -1094,6 +1114,7 @@ AccountSettingsPage.propTypes = {
     social_link_twitter: PropTypes.string,
     social_link_discord: PropTypes.string,
     time_zone: PropTypes.string,
+    ost2_email_preference: PropTypes.string,
     state: PropTypes.string,
     account_privacy: PropTypes.string,
     useVerifiedNameForCerts: PropTypes.bool.isRequired,

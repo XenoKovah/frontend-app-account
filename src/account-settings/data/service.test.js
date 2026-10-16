@@ -6,6 +6,7 @@ import {
   deleteProfilePhoto,
   patchAccount,
   patchSettings,
+  getSettings,
 } from './service';
 
 jest.mock('@edx/frontend-platform');
@@ -154,6 +155,33 @@ describe('account settings service', () => {
 
       expect(httpClient.patch.mock.calls.some(([url]) => url === accountUrl)).toBe(false);
       expect(httpClient.patch.mock.calls.some(([url]) => url === preferencesUrl)).toBe(true);
+    });
+  });
+
+  describe('email preference', () => {
+    const accountUrl = `${LMS_BASE_URL}/api/user/v1/accounts/${username}`;
+    const preferencesUrl = `${LMS_BASE_URL}/api/user/v1/preferences/${username}`;
+
+    it('routes ost2_email_preference to the preferences API', async () => {
+      await patchSettings(username, { ost2_email_preference: 'none' });
+
+      expect(httpClient.patch.mock.calls.some(([url]) => url === accountUrl)).toBe(false);
+      const preferencesPatch = httpClient.patch.mock.calls.find(([url]) => url === preferencesUrl);
+      expect(preferencesPatch[1]).toEqual({ ost2_email_preference: 'none' });
+    });
+
+    it.each([
+      [{}, 'all'],
+      [{ ost2_email_preference: 'course' }, 'course'],
+    ])('getSettings with preferences %j gives email preference %s', async (preferences, expected) => {
+      httpClient.get.mockImplementation(async (url) => {
+        if (url === accountUrl) { return { data: { username, social_links: [] } }; }
+        if (url === preferencesUrl) { return { data: preferences }; }
+        return { data: [] };
+      });
+
+      const settings = await getSettings(username, []);
+      expect(settings.ost2_email_preference).toEqual(expected);
     });
   });
 });

@@ -214,6 +214,40 @@ describe('AccountSettingsPage', () => {
     expect(saveAction.payload.commitValues).toEqual('https://github.com/new');
   });
 
+  it('shows the Email Preferences field in Site Preferences, defaulting to "Receive all emails"', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    const label = screen.getByText('Email Preferences');
+    expect(label.closest('#site-preferences')).not.toBeNull();
+    expect(label.closest('#email-preferences')).not.toBeNull();
+    expect(screen.getByText('Receive all emails')).toBeInTheDocument();
+  });
+
+  it('offers the three email preferences and saves the chosen one', () => {
+    store = mockStore({
+      ...mockData,
+      accountSettings: {
+        ...mockData.accountSettings,
+        openFormId: 'ost2_email_preference',
+        values: { ...mockData.accountSettings.values, ost2_email_preference: 'course' },
+      },
+    });
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+
+    const select = screen.getByLabelText('Email Preferences');
+    expect([...select.options].map(option => [option.value, option.text])).toEqual([
+      ['all', 'Receive all emails'],
+      ['course', 'Receive only emails sent to students enrolled in a course'],
+      ['none', 'Receive no emails'],
+    ]);
+    fireEvent.click(screen.getByText('Save'));
+
+    const saveAction = store.getActions().find(
+      (a) => a.type === 'ACCOUNT_SETTINGS__SAVE_SETTINGS' && a.payload.formId === 'ost2_email_preference',
+    );
+    expect(saveAction).toBeDefined();
+    expect(saveAction.payload.commitValues).toEqual('course');
+  });
+
   it('dispatches a SAVE_SETTINGS_FAILURE action when a social link is saved with an invalid URL (B3)', () => {
     store = mockStore({
       ...mockData,

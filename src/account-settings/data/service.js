@@ -30,6 +30,11 @@ const SOCIAL_PLATFORMS = [
 // preferences under dotted `visibility.<field>` keys, alongside account_privacy.
 const isVisibilityKey = (key) => key.startsWith('visibility.') || key === 'account_privacy';
 
+// OST2's site-wide email preference (user preference `ost2_email_preference`). Users who never chose one have no
+// preference row, and the backend treats them as 'all'.
+export const EMAIL_PREFERENCE_KEY = 'ost2_email_preference';
+export const EMAIL_PREFERENCE_DEFAULT = 'all';
+
 // Defense in depth: never turn a profile-supplied value into a clickable link
 // unless it is clearly an http(s) URL. Ported from the profile MFE so the
 // account editor validates the same way the public profile renders.
@@ -289,6 +294,9 @@ export async function getSettings(username, userRoles) {
 
   return {
     ...account,
+    // Default the email preference so that it is a known setting even when unset: the form only keeps drafts
+    // of known settings.
+    [EMAIL_PREFERENCE_KEY]: EMAIL_PREFERENCE_DEFAULT,
     ...preferences,
     thirdPartyAuthProviders,
     profileDataManager,
@@ -305,7 +313,7 @@ export async function patchSettings(username, commitValues) {
   // Note: time_zone exists in the return value from user/v1/accounts
   // but it is always null and won't update. It also exists in
   // user/v1/preferences where it does update. This is the one we use.
-  const preferenceKeys = ['time_zone'];
+  const preferenceKeys = ['time_zone', EMAIL_PREFERENCE_KEY];
   const certificateKeys = ['useVerifiedNameForCerts'];
   // Per-field visibility (visibility.<field>) and account_privacy are stored in
   // the user-preferences API, not the accounts API. Route them dynamically so
