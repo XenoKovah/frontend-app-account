@@ -490,7 +490,7 @@ const messages = defineMessages({
   },
   'account.settings.field.email.preferences.description': {
     id: 'account.settings.field.email.preferences.description',
-    defaultMessage: 'Choose which emails you receive from {siteName}. "Receive all emails" includes announcements sent to everyone on the site as well as emails from the instructors of the courses you are enrolled in. Emails about your account, such as password resets, are always sent.',
+    defaultMessage: 'Choose which emails you receive from {siteName}. "Receive all emails" includes announcements sent to everyone on the site as well as emails from the instructors of the courses you are enrolled in. "Receive only emails sent to students enrolled in a course" opts you out of site-wide emails, but keeps the class-specific instructor announcements and replies to any Discussions thread messages you post. And "Receive no emails" opts you out of both of the above. Emails about your account, such as password resets, are always sent.',
     description: 'Description for the site-wide email preference field.',
   },
   'account.settings.field.time.zone.default': {
