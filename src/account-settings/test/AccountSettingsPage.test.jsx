@@ -273,11 +273,15 @@ describe('AccountSettingsPage', () => {
   });
 
   it('opens the email editor when sent to #email (OST2 account-activation banner)', () => {
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView; // jsdom has none
     render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
     expect(document.getElementById('email')).toBeInTheDocument();
     window.location.hash = '#email';
     fireEvent(window, new HashChangeEvent('hashchange'));
+    expect(scrollIntoView.mock.contexts).toContain(document.getElementById('email'));
     expect(store.getActions()).toContainEqual({ type: 'OPEN_FORM', payload: { formId: 'email' } });
     window.location.hash = '';
+    delete Element.prototype.scrollIntoView;
   });
 });

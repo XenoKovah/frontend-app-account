@@ -299,7 +299,9 @@ class AccountSettingsPage extends React.Component {
       return;
     }
     if (Object.keys(this.navLinkRefs).includes(locationHash) && this.navLinkRefs[locationHash].current) {
-      window.scrollTo(0, this.navLinkRefs[locationHash].current.offsetTop);
+      // OST2: not window.scrollTo(0, offsetTop): offsetTop is relative to the Bootstrap column (position: relative)
+      // the sections sit in, so that scrolled short by the column's own offset from the top of the page.
+      this.navLinkRefs[locationHash].current.scrollIntoView();
     }
     // OST2: #email is where the account-activation banner sends learners to fix their address, so open its editor.
     if (locationHash === '#email' && this.isEditable('email')) {
