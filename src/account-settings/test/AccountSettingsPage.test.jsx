@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
-  render, screen, fireEvent,
+  render, screen, fireEvent, waitFor,
 } from '@testing-library/react';
 import configureStore from 'redux-mock-store';
 import { IntlProvider, injectIntl } from '@edx/frontend-platform/i18n';
@@ -272,15 +272,15 @@ describe('AccountSettingsPage', () => {
     expect(failureAction.payload.errors.social_link_github).toBeDefined();
   });
 
-  it('opens the email editor when sent to #email (OST2 account-activation banner)', () => {
+  it('opens the email editor when sent to #email (OST2 account-activation banner)', async () => {
     const scrollIntoView = jest.fn();
     Element.prototype.scrollIntoView = scrollIntoView; // jsdom has none
     render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
     expect(document.getElementById('email')).toBeInTheDocument();
     window.location.hash = '#email';
     fireEvent(window, new HashChangeEvent('hashchange'));
-    expect(scrollIntoView.mock.contexts).toContain(document.getElementById('email'));
     expect(store.getActions()).toContainEqual({ type: 'OPEN_FORM', payload: { formId: 'email' } });
+    await waitFor(() => expect(scrollIntoView.mock.contexts).toContain(document.getElementById('email')));
     window.location.hash = '';
     delete Element.prototype.scrollIntoView;
   });
