@@ -271,4 +271,13 @@ describe('AccountSettingsPage', () => {
     expect(failureAction).toBeDefined();
     expect(failureAction.payload.errors.social_link_github).toBeDefined();
   });
+
+  it('opens the email editor when sent to #email (OST2 account-activation banner)', () => {
+    render(reduxWrapper(<IntlAccountSettingsPage {...props} />));
+    expect(document.getElementById('email')).toBeInTheDocument();
+    window.location.hash = '#email';
+    fireEvent(window, new HashChangeEvent('hashchange'));
+    expect(store.getActions()).toContainEqual({ type: 'OPEN_FORM', payload: { formId: 'email' } });
+    window.location.hash = '';
+  });
 });

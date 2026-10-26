@@ -26,6 +26,7 @@ import {
   saveSettingsFailure,
   updateDraft,
   beginNameChange,
+  openForm,
 } from './data/actions';
 import { accountSettingsPageSelector } from './data/selectors';
 import { EMAIL_PREFERENCE_DEFAULT, EMAIL_PREFERENCE_KEY, isSafeHttpUrl } from './data/service';
@@ -69,6 +70,7 @@ class AccountSettingsPage extends React.Component {
 
     this.navLinkRefs = {
       '#basic-information': React.createRef(),
+      '#email': React.createRef(),
       '#profile-information': React.createRef(),
       '#social-media': React.createRef(),
       '#profile-visibility': React.createRef(),
@@ -89,21 +91,25 @@ class AccountSettingsPage extends React.Component {
       visibility: null,
       user_id: this.context.authenticatedUser.userId,
     });
+    window.addEventListener('hashchange', this.handleHashChange);
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.loading && !prevProps.loaded && this.props.loaded) {
-      const locationHash = global.location.hash;
-      // Check for the locationHash in the URL and then scroll to it if it is in the
-      // NavLinks list
-      if (typeof locationHash !== 'string') {
-        return;
-      }
-      if (Object.keys(this.navLinkRefs).includes(locationHash) && this.navLinkRefs[locationHash].current) {
-        window.scrollTo(0, this.navLinkRefs[locationHash].current.offsetTop);
-      }
+      this.goToLocationHash();
     }
   }
+
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this.handleHashChange);
+  }
+
+  // A link to #email from this page itself (the account-activation banner) only changes the hash.
+  handleHashChange = () => {
+    if (this.props.loaded) {
+      this.goToLocationHash();
+    }
+  };
 
   // NOTE: We need 'locale' for the memoization in getLocalizedTimeZoneOptions.  Don't remove it!
   // eslint-disable-next-line no-unused-vars
@@ -284,6 +290,22 @@ class AccountSettingsPage extends React.Component {
 
     return countriesCodesList.length > 0 && !countriesCodesList.find(x => x === country);
   };
+
+  goToLocationHash() {
+    const locationHash = global.location.hash;
+    // Check for the locationHash in the URL and then scroll to it if it is in the
+    // NavLinks list
+    if (typeof locationHash !== 'string') {
+      return;
+    }
+    if (Object.keys(this.navLinkRefs).includes(locationHash) && this.navLinkRefs[locationHash].current) {
+      window.scrollTo(0, this.navLinkRefs[locationHash].current.offsetTop);
+    }
+    // OST2: #email is where the account-activation banner sends learners to fix their address, so open its editor.
+    if (locationHash === '#email' && this.isEditable('email')) {
+      this.props.openForm('email');
+    }
+  }
 
   isEditable(fieldName) {
     return !this.props.staticFields.includes(fieldName);
@@ -747,23 +769,25 @@ class AccountSettingsPage extends React.Component {
             />
             )}
 
-          <EmailField
-            name="email"
-            label={this.props.intl.formatMessage(messages['account.settings.field.email'])}
-            emptyLabel={
-              this.isEditable('email')
-                ? this.props.intl.formatMessage(messages['account.settings.field.email.empty'])
-                : this.renderEmptyStaticFieldMessage()
-            }
-            value={this.props.formValues.email}
-            confirmationMessageDefinition={messages['account.settings.field.email.confirmation']}
-            helpText={this.props.intl.formatMessage(
-              messages['account.settings.field.email.help.text'],
-              { siteName: getConfig().SITE_NAME },
-            )}
-            isEditable={this.isEditable('email')}
-            {...editableFieldProps}
-          />
+          <div id="email" ref={this.navLinkRefs['#email']}>
+            <EmailField
+              name="email"
+              label={this.props.intl.formatMessage(messages['account.settings.field.email'])}
+              emptyLabel={
+                this.isEditable('email')
+                  ? this.props.intl.formatMessage(messages['account.settings.field.email.empty'])
+                  : this.renderEmptyStaticFieldMessage()
+              }
+              value={this.props.formValues.email}
+              confirmationMessageDefinition={messages['account.settings.field.email.confirmation']}
+              helpText={this.props.intl.formatMessage(
+                messages['account.settings.field.email.help.text'],
+                { siteName: getConfig().SITE_NAME },
+              )}
+              isEditable={this.isEditable('email')}
+              {...editableFieldProps}
+            />
+          </div>
           {this.renderSecondaryEmailField(editableFieldProps)}
           <ResetPassword email={this.props.formValues.email} />
           {(!getConfig().ENABLE_COPPA_COMPLIANCE)
@@ -1158,6 +1182,7 @@ AccountSettingsPage.propTypes = {
   saveSettingsFailure: PropTypes.func.isRequired,
   fetchSettings: PropTypes.func.isRequired,
   beginNameChange: PropTypes.func.isRequired,
+  openForm: PropTypes.func.isRequired,
   fetchCourseList: PropTypes.func.isRequired,
   tpaProviders: PropTypes.arrayOf(PropTypes.shape({
     connected: PropTypes.bool,
@@ -1231,4 +1256,5 @@ export default withLocation(withNavigate(connect(accountSettingsPageSelector, {
   updateDraft,
   fetchSiteLanguages,
   beginNameChange,
+  openForm,
 })(injectIntl(AccountSettingsPage))));
